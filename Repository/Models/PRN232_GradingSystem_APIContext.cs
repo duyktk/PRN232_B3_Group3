@@ -389,9 +389,6 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
             entity.Property(e => e.Role)
                 .HasMaxLength(50)
                 .HasColumnName("role");
-            entity.Property(e => e.Salt)
-                .IsRequired()
-                .HasColumnName("salt");
             entity.Property(e => e.Username)
                 .IsRequired()
                 .HasMaxLength(100)
