@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Repository.Models;
+using Repository.BussinessModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -202,8 +203,28 @@ namespace Repository
             GC.SuppressFinalize(this);
         }
 
+        public async Task<Submission> GetSubmissionByIdAsync(int id, bool includeDetails = true)
+         => includeDetails 
+            ? await _context.Submissions.Include(s => s.Exam).Include(s => s.Student).Include(s => s.Grades).Where(s => s.Submissionid.Equals(id)).FirstOrDefaultAsync()
+            : await _context.Submissions.Where(s => s.Submissionid.Equals(id)).FirstOrDefaultAsync();
+
         public async Task<User?> Login(string username, string password)
             => await _context.Users.Where(u => u.Username.Equals(username) && password.Equals(password)).FirstOrDefaultAsync();
-        
+
+        public async Task<Exam> GetExamWithFullDataAsync(int examId)
+        {
+            return await _context.Exams
+                .Include(e => e.Submissions)
+                    .ThenInclude(s => s.Student)
+                        .ThenInclude(st => st.GroupStudents)
+                            .ThenInclude(gs => gs.Group)
+                .Include(e => e.Submissions)
+                    .ThenInclude(s => s.Grades)
+                        .ThenInclude(g => g.Gradedetails)
+                .Include(e => e.Submissions)
+                    .ThenInclude(s => s.Grades)
+                        .ThenInclude(g => g.MarkerNavigation)
+                .FirstOrDefaultAsync(e => e.Examid == examId);
+        }
     }
 }

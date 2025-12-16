@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Repository;
+using Service;
 using System.Security.Claims;
 using System.Text;
 
@@ -53,6 +54,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped(typeof(GenericRepository<>));
+builder.Services.AddScoped<UnitOfWork>();
+
+builder.Services.AddScoped<IExamExportService, ExamExportService>();
+builder.Services.AddScoped<IExtractZipService, ExtractZipService>();
+builder.Services.AddScoped<ISubmissionService, SubmissionService>();
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
