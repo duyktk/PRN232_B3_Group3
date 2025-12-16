@@ -1,33 +1,45 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using Repository;
-using Service;
+using Service; // Chứa các Service cũ (ExamExport, ExtractZip...)
+using Service.Interfaces; // Chứa IUserService
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ====================================================
+// 1. CẤU HÌNH CONTROLLER & SWAGGER
+// ====================================================
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddHttpContextAccessor();
+
+// Cấu hình Swagger + Nút Authorize
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Exam Checker API", Version = "v1" });
+
+    // Cấu hình Security Scheme (Http Bearer)
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
-        Name = "Authorization",
-        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Type = SecuritySchemeType.Http,
         Scheme = "Bearer",
         BearerFormat = "JWT",
-        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
-        Description = "Nhập token theo định dạng: Bearer {token}"
+        In = ParameterLocation.Header,
+        Name = "Authorization",
+        Description = "Nhập token vào ô bên dưới (Không cần chữ 'Bearer ' ở đầu)"
     });
 
-    options.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
-            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            new OpenApiSecurityScheme
             {
-                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                Reference = new OpenApiReference
                 {
-                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Type = ReferenceType.SecurityScheme,
                     Id = "Bearer"
                 }
             },
@@ -36,6 +48,9 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// ====================================================
+// 2. CẤU HÌNH JWT AUTHENTICATION
+// ====================================================
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -51,21 +66,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+// ====================================================
+// 3. ĐĂNG KÝ DEPENDENCY INJECTION (GỘP CẢ 2 BÊN)
+// ====================================================
 
-builder.Services.AddScoped(typeof(GenericRepository<>));
+// A. UnitOfWork & Repository
 builder.Services.AddScoped<UnitOfWork>();
+builder.Services.AddScoped(typeof(GenericRepository<>)); // Giữ lại để đảm bảo tính năng cũ không lỗi
 
+// B. User Services (Phần của bạn)
+builder.Services.AddScoped<IUserService, UserService>();
+
+// C. Exam & Submission Services (Phần của nhóm/Upstream)
 builder.Services.AddScoped<IExamExportService, ExamExportService>();
 builder.Services.AddScoped<IExtractZipService, ExtractZipService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+// ====================================================
+// 4. BUILD APP & MIDDLEWARE
+// ====================================================
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -77,8 +96,13 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// Thứ tự quan trọng: Authen -> Author
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+// (Tùy chọn) Seed Data nếu cần
+// await DbInitializer.SeedAdminUser(app);
 
 app.Run();
