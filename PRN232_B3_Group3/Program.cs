@@ -6,6 +6,7 @@ using Service; // Chứa các Service cũ (ExamExport, ExtractZip...)
 using Service.Interfaces; // Chứa IUserService
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +14,7 @@ var builder = WebApplication.CreateBuilder(args);
 // 1. CẤU HÌNH CONTROLLER & SWAGGER
 // ====================================================
 builder.Services.AddControllers();
+builder.Services.AddRouting(options => options.LowercaseUrls = true);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
@@ -77,7 +79,10 @@ builder.Services.AddScoped(typeof(GenericRepository<>)); // Giữ lại để đ
 // B. User Services (Phần của bạn)
 builder.Services.AddScoped<IUserService, UserService>();
 
-// C. Exam & Submission Services (Phần của nhóm/Upstream)
+// C. Student Services
+builder.Services.AddScoped<IStudentService_, StudentService>();
+
+// D. Exam & Submission Services (Phần của nhóm/Upstream)
 builder.Services.AddScoped<IExamExportService, ExamExportService>();
 builder.Services.AddScoped<IExtractZipService, ExtractZipService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();

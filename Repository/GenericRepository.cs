@@ -17,6 +17,11 @@ namespace Repository
             _context = context;
         }
 
+        public DbSet<T> GetDbSet()
+        {
+            return _context.Set<T>();
+        }
+
         public List<T> GetAll()
         {
             return _context.Set<T>().ToList();
