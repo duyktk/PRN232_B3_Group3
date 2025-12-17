@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using OfficeOpenXml;
 using Repository;
 using Service;
 using System.Security.Claims;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
+
+ExcelPackage.License.SetNonCommercialPersonal("GROUP4");
 
 // Add services to the container.
 builder.Services.AddSwaggerGen(options =>
@@ -50,6 +53,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             RoleClaimType = ClaimTypes.Role
         };
     });
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddAuthorization();
 
@@ -59,7 +64,7 @@ builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped<IExamExportService, ExamExportService>();
 builder.Services.AddScoped<IExtractZipService, ExtractZipService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
-
+builder.Services.AddScoped<IExamService, ExamService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -69,12 +74,9 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseRouting();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

@@ -9,7 +9,7 @@ public partial class Grade
 {
     public int Gradeid { get; set; }
 
-    public int? Submissionid { get; set; }
+    public int? SubmissionId { get; set; }
 
     public decimal? Q1 { get; set; }
 

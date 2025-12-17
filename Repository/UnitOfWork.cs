@@ -203,10 +203,16 @@ namespace Repository
             GC.SuppressFinalize(this);
         }
 
-        public async Task<Submission> GetSubmissionByIdAsync(int id, bool includeDetails = true)
-         => includeDetails 
-            ? await _context.Submissions.Include(s => s.Exam).Include(s => s.Student).Include(s => s.Grades).Where(s => s.Submissionid.Equals(id)).FirstOrDefaultAsync()
-            : await _context.Submissions.Where(s => s.Submissionid.Equals(id)).FirstOrDefaultAsync();
+        public async Task<Submission> GetSubmissionByIdAsync(int id)
+        {
+            var entity = await _context.Submissions.Where(s => s.SubmissionId == id).FirstOrDefaultAsync();
+            return entity;
+        }
+
+        public async Task<Exam> GetExamByIdAsync(int id, bool includeDetails)
+         => includeDetails
+            ? await _context.Exams.Include(s => s.Semester).Include(s => s.Subject).Include(s => s.Submissions).Where(s => s.Examid==id).FirstOrDefaultAsync()
+            : await _context.Exams.Where(s => s.Examid == id).FirstOrDefaultAsync();
 
         public async Task<User?> Login(string username, string password)
             => await _context.Users.Where(u => u.Username.Equals(username) && password.Equals(password)).FirstOrDefaultAsync();
@@ -225,6 +231,15 @@ namespace Repository
                     .ThenInclude(s => s.Grades)
                         .ThenInclude(g => g.MarkerNavigation)
                 .FirstOrDefaultAsync(e => e.Examid == examId);
+        }
+
+        public IQueryable<Student> GetAllWithDetails()
+        {
+            return _context.Students
+                .Include(s => s.GroupStudents)
+                    .ThenInclude(gs => gs.Group)
+                .Include(s => s.Submissions)
+                .AsQueryable();
         }
     }
 }

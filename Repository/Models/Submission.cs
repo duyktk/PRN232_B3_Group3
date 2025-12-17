@@ -7,7 +7,7 @@ namespace Repository.Models;
 
 public partial class Submission
 {
-    public int Submissionid { get; set; }
+    public int SubmissionId { get; set; }
 
     public int? Examid { get; set; }
 
@@ -15,7 +15,7 @@ public partial class Submission
 
     public string Solution { get; set; }
 
-    public string Comment { get; set; }
+    public string? Comment { get; set; }
 
     public string Fileurl { get; set; }
 

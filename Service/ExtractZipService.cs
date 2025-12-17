@@ -10,6 +10,7 @@ using SharpCompress.Archives;
 using SharpCompress.Archives.Rar;
 using System.Text.Json;
 using Repository;
+using Repository.Models;
 
 namespace Service
 {
@@ -19,9 +20,11 @@ namespace Service
         private readonly string _bucketName;
         private readonly string _endpoint;
         private readonly UnitOfWork _unitOfWork;
+        private readonly IExamService _examService;
+        private readonly ISubmissionService _submissionService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ExtractZipService(IConfiguration configuration, UnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor)
+        public ExtractZipService(IConfiguration configuration, UnitOfWork unitOfWork, IHttpContextAccessor httpContextAccessor, IExamService examService, ISubmissionService submissionService)
         {
             _endpoint = configuration["Backblaze:Endpoint"] ?? "";
             var keyId = configuration["Backblaze:KeyId"] ?? "";
@@ -38,6 +41,8 @@ namespace Service
                 SignatureVersion = "4"
             };
             _s3Client = new AmazonS3Client(credentials, config);
+            _examService = examService;
+            _submissionService = submissionService;
         }
 
         public async Task<IReadOnlyList<string>> UploadArchiveAsync(Stream contentStream, string fileName, string contentType, string prefix, int examId, CancellationToken cancellationToken = default)
@@ -80,9 +85,9 @@ namespace Service
                     // Extract student code and solution
                     var studentCode = ExtractStudentCode(relative);
                     var solution = ExtractSolution(relative);
+                    var submission = await FindOrCreateSubmissionAsync(studentCode, entryKey, resolvedExamId, solution, cancellationToken);
 
-                    //var exam = await _examService.GetExamByIdAsync(resolvedExamId);
-                    var exam = await _unitOfWork.ExamRepository.GetByIdAsync(resolvedExamId);
+                    var exam = await _examService.GetByIdAsync(resolvedExamId);
                     var examCode = exam?.Examname ?? "PE_PRN222_SU25_332278"; // fallback if exam not found
 
                     // Get ExaminerCode from current user email
@@ -109,10 +114,10 @@ namespace Service
                     // Extract student code and solution
                     var studentCode = ExtractStudentCode(relative);
                     var solution = ExtractSolution(relative);
+                    var submission = await FindOrCreateSubmissionAsync(studentCode, entryKey, resolvedExamId, solution, cancellationToken);
 
-                    //var exam = await _examService.GetExamByIdAsync(resolvedExamId);
-                    var exam = await _unitOfWork.ExamRepository.GetByIdAsync(resolvedExamId);
-                    var examCode = exam?.Examname ?? "PE_PRN222_SU25_332278"; // fallback if exam not found
+                    var exam = await _examService.GetByIdAsync(resolvedExamId);
+                    var examCode = exam?.Examname ?? "PE_PRN232_SU25_332278"; // fallback if exam not found
 
                     // Get ExaminerCode from current user email
                     var examinerCode = GetCurrentUserEmail();
@@ -228,6 +233,23 @@ namespace Service
 
             // Return the full folder name (e.g., "anhdlse181818")
             return parts[0];
+        }
+
+        private async Task<Submission> FindOrCreateSubmissionAsync(string studentCode, string fileUrl, int examId, string solution, CancellationToken cancellationToken)
+        {
+            // Find student by Studentroll (student code) - case insensitive
+            var studentCodeLower = studentCode?.ToLowerInvariant() ?? string.Empty;
+            var student = _unitOfWork.GetAllWithDetails()
+                .FirstOrDefault(s => s.Studentroll != null && s.Studentroll.ToLower() == studentCodeLower);
+
+            if (student == null)
+            {
+                throw new InvalidOperationException($"Student with code '{studentCode}' not found.");
+            }
+
+            // Use solution (full folder name like "anhdlse181818") for Solution field
+            var submission = await _submissionService.FindOrCreateSubmissionAsync(examId, student.Studentid, fileUrl, solution);
+            return submission;
         }
 
         private static string? GetTopLevelNameFromRar(RarArchive rar)

@@ -9,6 +9,8 @@ namespace Service
 {
     public interface ISubmissionService
     {
-        Task<Submission> GetByIdAsync(int id, bool includeDetails = true);
+        Task<Submission> GetByIdAsync(int id);
+        Task<Submission> FindOrCreateSubmissionAsync(int examId, int studentId, string fileUrl, string studentRoll = null);
+
     }
 }

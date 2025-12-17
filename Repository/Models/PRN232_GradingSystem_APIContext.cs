@@ -96,7 +96,7 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
 
             entity.HasIndex(e => e.Marker, "IX_grade_marker");
 
-            entity.HasIndex(e => e.Submissionid, "IX_grade_submissionid");
+            entity.HasIndex(e => e.SubmissionId, "IX_grade_submissionid");
 
             entity.Property(e => e.Gradeid).HasColumnName("gradeid");
             entity.Property(e => e.Createat)
@@ -124,7 +124,7 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
             entity.Property(e => e.Status)
                 .HasMaxLength(50)
                 .HasColumnName("status");
-            entity.Property(e => e.Submissionid).HasColumnName("submissionid");
+            entity.Property(e => e.SubmissionId).HasColumnName("submissionid");
             entity.Property(e => e.Totalscore)
                 .HasColumnType("decimal(6, 2)")
                 .HasColumnName("totalscore");
@@ -135,7 +135,7 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
                 .HasConstraintName("grade_marker_fkey");
 
             entity.HasOne(d => d.Submission).WithMany(p => p.Grades)
-                .HasForeignKey(d => d.Submissionid)
+                .HasForeignKey(d => d.SubmissionId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("grade_submissionid_fkey");
         });
@@ -331,7 +331,7 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
 
         modelBuilder.Entity<Submission>(entity =>
         {
-            entity.HasKey(e => e.Submissionid).HasName("submission_pkey");
+            entity.HasKey(e => e.SubmissionId).HasName("submission_pkey");
 
             entity.ToTable("submission");
 
@@ -339,7 +339,7 @@ public partial class PRN232_GradingSystem_APIContext : DbContext
 
             entity.HasIndex(e => e.Studentid, "IX_submission_studentid");
 
-            entity.Property(e => e.Submissionid).HasColumnName("submissionid");
+            entity.Property(e => e.SubmissionId).HasColumnName("submissionid");
             entity.Property(e => e.Comment).HasColumnName("comment");
             entity.Property(e => e.Createat)
                 .HasDefaultValueSql("(getdate())")

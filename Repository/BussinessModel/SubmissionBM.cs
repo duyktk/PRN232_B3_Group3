@@ -9,7 +9,7 @@ namespace Repository.BussinessModel
 {
     public class SubmissionBM
     {
-        public int Submissionid { get; set; }
+        public int SubmissionId { get; set; }
         public int? Examid { get; set; }
         public int? Studentid { get; set; }
         public string Solution { get; set; }

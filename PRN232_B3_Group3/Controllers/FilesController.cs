@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Repository;
 using Service;
 using Service.RequestModel;
 using Service.ResponseModel;
@@ -14,9 +15,11 @@ namespace PRN232_B3_Group3.Controllers
         private const long MaxFileSizeBytes = 1024L * 1024 * 1024; // 1 GB
         private readonly IExtractZipService _fileStorageService;
         private readonly ISubmissionService _submissionService;
-        public FilesController(IExtractZipService fileStorageService)
+
+        public FilesController(IExtractZipService fileStorageService, ISubmissionService submissionService)
         {
             _fileStorageService = fileStorageService;
+            _submissionService = submissionService;
         }
 
         [HttpPost("upload-archive")]
