@@ -11,6 +11,7 @@
     <PackageReference Include="EPPlus" Version="8.0.5" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="5.0.0" />
     <PackageReference Include="SharpCompress" Version="0.42.1" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>

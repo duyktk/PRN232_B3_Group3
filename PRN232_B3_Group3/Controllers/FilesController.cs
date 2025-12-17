@@ -14,9 +14,11 @@ namespace PRN232_B3_Group3.Controllers
         private const long MaxFileSizeBytes = 1024L * 1024 * 1024; // 1 GB
         private readonly IExtractZipService _fileStorageService;
         private readonly ISubmissionService _submissionService;
-        public FilesController(IExtractZipService fileStorageService)
+        private readonly IScanHardCodeService _scanHardCodeService;
+        public FilesController(IExtractZipService fileStorageService, IScanHardCodeService scanHardCodeService)
         {
             _fileStorageService = fileStorageService;
+            _scanHardCodeService = scanHardCodeService;
         }
 
         [HttpPost("upload-archive")]
@@ -92,5 +94,17 @@ namespace PRN232_B3_Group3.Controllers
             }
         }
 
+        [HttpPost("scan-hard-code-zip")]
+        public async Task<IActionResult> ScanHardCodeZip(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("Zip file is required.");
+
+            var result = await _scanHardCodeService
+                .ScanHardCodeFromZipAsync(file);
+
+            return Ok(ApiResponse<ScanHardcodeResponse>
+                .SuccessResponse(result, "Scan completed"));
+        }
     }
 }

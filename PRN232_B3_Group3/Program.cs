@@ -75,7 +75,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // A. UnitOfWork & Repository
 builder.Services.AddScoped<UnitOfWork>();
 builder.Services.AddScoped(typeof(GenericRepository<>)); // Giữ lại để đảm bảo tính năng cũ không lỗi
-
+builder.Services.AddScoped<IScanRepository, ScanRepository>();
 // B. User Services (Phần của bạn)
 builder.Services.AddScoped<IUserService, UserService>();
 
@@ -86,7 +86,8 @@ builder.Services.AddScoped<IStudentService_, StudentService>();
 builder.Services.AddScoped<IExamExportService, ExamExportService>();
 builder.Services.AddScoped<IExtractZipService, ExtractZipService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
-
+builder.Services.AddScoped<IScanHardCodeService, ScanHardCodeService>();
+builder.Services.AddScoped<IZipExtractService, ZipExtractService>();
 // ====================================================
 // 4. BUILD APP & MIDDLEWARE
 // ====================================================
