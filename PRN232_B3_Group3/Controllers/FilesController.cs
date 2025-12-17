@@ -16,7 +16,7 @@ namespace PRN232_B3_Group3.Controllers
         private readonly IExtractZipService _fileStorageService;
         private readonly ISubmissionService _submissionService;
         private readonly IScanHardCodeService _scanHardCodeService;
-        public FilesController(IExtractZipService fileStorageService, IScanHardCodeService scanHardCodeService)
+        public FilesController(IExtractZipService fileStorageService, IScanHardCodeService scanHardCodeService, ISubmissionService submissionService)
         {
             _fileStorageService = fileStorageService;
             _scanHardCodeService = scanHardCodeService;
