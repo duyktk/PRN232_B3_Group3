@@ -94,6 +94,7 @@ builder.Services.AddScoped<IExtractZipService, ExtractZipService>();
 builder.Services.AddScoped<ISubmissionService, SubmissionService>();
 builder.Services.AddScoped<IScanHardCodeService, ScanHardCodeService>();
 builder.Services.AddScoped<IZipExtractService, ZipExtractService>();
+builder.Services.AddScoped<IGradeService, GradeService>();
 // ====================================================
 // 4. BUILD APP & MIDDLEWARE
 // ====================================================

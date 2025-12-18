@@ -241,5 +241,20 @@ namespace Repository
                 .Include(s => s.Submissions)
                 .AsQueryable();
         }
+
+        public async Task<Submission?> GetSubmissionWithGradeFullAsync(int submissionId)
+        {
+            return await _context.Submissions
+                .Include(s => s.Grades)
+                    .ThenInclude(g => g.MarkerNavigation)
+                .Include(s => s.Grades)
+                    .ThenInclude(g => g.Gradedetails)
+                .FirstOrDefaultAsync(s => s.SubmissionId == submissionId);
+        }
+
+        public async Task<User?> GetUserByIdAsync(int id)
+        {
+            return await _context.Users.FirstOrDefaultAsync(u => u.Userid == id);
+        }
     }
 }
