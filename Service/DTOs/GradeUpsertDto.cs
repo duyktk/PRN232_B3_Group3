@@ -8,8 +8,6 @@ namespace Service.DTOs
 {
     public class GradeUpsertDto
     {
-        public int SubmissionId { get; set; }
-
         public decimal Q1 { get; set; }
         public decimal Q2 { get; set; }
         public decimal Q3 { get; set; }

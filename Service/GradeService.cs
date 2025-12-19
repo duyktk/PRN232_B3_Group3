@@ -20,20 +20,20 @@ namespace Service
 
         private const decimal MAX_TOTAL = 10.0m;
 
-        // POST behavior: only create if not exist
-        public async Task<GradeResultDto> CreateGradeAsync(int myUserId, string myRole, GradeUpsertDto dto)
+       
+        public async Task<GradeResultDto> CreateGradeAsync(int myUserId, string myRole, int submissionId, GradeUpsertDto dto)
         {
             ValidateMainScores(dto);
 
             // Ensure submission exists
-            var submission = await _unitOfWork.GetSubmissionByIdAsync(dto.SubmissionId);
+            var submission = await _unitOfWork.GetSubmissionByIdAsync(submissionId);
             if (submission == null)
-                throw new Exception($"SubmissionId {dto.SubmissionId} not found.");
+                throw new Exception($"SubmissionId {submissionId} not found.");
 
             // Check existing grade by submissionId (same style as SubmissionService)
             var gradeRepo = _unitOfWork.GradeRepository;
             var existingGrade = gradeRepo.GetAll()
-                .FirstOrDefault(g => g.SubmissionId == dto.SubmissionId);
+                .FirstOrDefault(g => g.SubmissionId == submissionId);
 
             if (existingGrade != null)
                 throw new Exception("This submission already has a grade. Use UPDATE.");
@@ -41,7 +41,7 @@ namespace Service
             // Create grade
             var newGrade = new Grade
             {
-                SubmissionId = dto.SubmissionId,
+                SubmissionId = submissionId,
                 Q1 = dto.Q1,
                 Q2 = dto.Q2,
                 Q3 = dto.Q3,
@@ -81,7 +81,7 @@ namespace Service
             return new GradeResultDto
             {
                 GradeId = newGrade.Gradeid,
-                SubmissionId = dto.SubmissionId,
+                SubmissionId = submissionId,
                 MarkerUserId = myUserId,
                 Total = newGrade.Totalscore ?? 0,
                 Status = newGrade.Status,
@@ -90,13 +90,13 @@ namespace Service
         }
 
         // PUT behavior: update only if exist + role rules
-        public async Task<GradeResultDto> UpdateGradeAsync(int myUserId, string myRole, GradeUpsertDto dto)
+        public async Task<GradeResultDto> UpdateGradeAsync(int myUserId, string myRole, int submissionId, GradeUpsertDto dto)
         {
             ValidateMainScores(dto);
 
-            var submission = await _unitOfWork.GetSubmissionByIdAsync(dto.SubmissionId);
+            var submission = await _unitOfWork.GetSubmissionByIdAsync(submissionId);
             if (submission == null)
-                throw new Exception($"SubmissionId {dto.SubmissionId} not found.");
+                throw new Exception($"SubmissionId {submissionId} not found.");
 
             var myRoleId = ParseRoleIdOrThrow(myRole, "Your role must be numeric (e.g. '2','3','4').");
 
@@ -105,7 +105,7 @@ namespace Service
 
             // Load existing grade
             var existingGrade = gradeRepo.GetAll()
-                .FirstOrDefault(g => g.SubmissionId == dto.SubmissionId);
+                .FirstOrDefault(g => g.SubmissionId == submissionId);
 
             if (existingGrade == null)
                 throw new Exception("This submission has no grade yet. Use CREATE.");
@@ -170,7 +170,7 @@ namespace Service
             return new GradeResultDto
             {
                 GradeId = existingGrade.Gradeid,
-                SubmissionId = dto.SubmissionId,
+                SubmissionId = submissionId,
                 MarkerUserId = myUserId,
                 Total = existingGrade.Totalscore ?? 0,
                 Status = existingGrade.Status,

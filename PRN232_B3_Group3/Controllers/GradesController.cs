@@ -9,40 +9,42 @@ namespace PRN232_B3_Group3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class GradeController : ControllerBase
+    public class GradesController : ControllerBase
     {
         private readonly IGradeService _gradeService;
 
-        public GradeController(IGradeService gradeService)
+        public GradesController(IGradeService gradeService)
         {
             _gradeService = gradeService;
         }
 
-        [HttpPost]
+        // POST /api/grades/{submissionId}
+        [HttpPost("{submissionId:int}")]
         [Authorize]
-        public async Task<IActionResult> Create([FromBody] GradeUpsertDto dto)
+        public async Task<IActionResult> Create([FromRoute] int submissionId, [FromBody] GradeUpsertDto dto)
         {
             try
             {
                 int myUserId = GetMyUserId();
                 string myRole = GetMyRole();
 
-                var result = await _gradeService.CreateGradeAsync(myUserId, myRole, dto);
+                var result = await _gradeService.CreateGradeAsync(myUserId, myRole, submissionId, dto);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
         }
 
-        [HttpPut]
+        // PUT /api/grades/{submissionId}
+        [HttpPut("{submissionId:int}")]
         [Authorize]
-        public async Task<IActionResult> Update([FromBody] GradeUpsertDto dto)
+        public async Task<IActionResult> Update([FromRoute] int submissionId, [FromBody] GradeUpsertDto dto)
         {
             try
             {
                 int myUserId = GetMyUserId();
                 string myRole = GetMyRole();
 
-                var result = await _gradeService.UpdateGradeAsync(myUserId, myRole, dto);
+                var result = await _gradeService.UpdateGradeAsync(myUserId, myRole, submissionId, dto);
                 return Ok(result);
             }
             catch (Exception ex) { return BadRequest(ex.Message); }
