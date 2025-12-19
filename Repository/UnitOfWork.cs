@@ -242,6 +242,15 @@ namespace Repository
                 .AsQueryable();
         }
 
+        public async Task<Student?> GetStudentWithDetails(string studentroll)
+        {
+            return await _context.Students
+                .Include(s => s.GroupStudents)
+                    .ThenInclude(gs => gs.Group)
+                .Include(s => s.Submissions)
+                .Where(s => s.Studentroll.Trim().ToLower().Equals(studentroll.Trim().ToLower())).FirstOrDefaultAsync();
+        }
+
         public async Task<Submission?> GetSubmissionWithGradeFullAsync(int submissionId)
         {
             return await _context.Submissions

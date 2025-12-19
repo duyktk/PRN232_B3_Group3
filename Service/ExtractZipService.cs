@@ -11,6 +11,7 @@ using SharpCompress.Archives.Rar;
 using System.Text.Json;
 using Repository;
 using Repository.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Service
 {
@@ -88,7 +89,7 @@ namespace Service
                     var submission = await FindOrCreateSubmissionAsync(studentCode, entryKey, resolvedExamId, solution, cancellationToken);
 
                     var exam = await _examService.GetByIdAsync(resolvedExamId);
-                    var examCode = exam?.Examname ?? "PE_PRN222_SU25_332278"; // fallback if exam not found
+                    var examCode = exam?.Examname ?? "PE_PRN232_FA25_20251019"; // fallback if exam not found
 
                     // Get ExaminerCode from current user email
                     var examinerCode = GetCurrentUserEmail();
@@ -117,7 +118,7 @@ namespace Service
                     var submission = await FindOrCreateSubmissionAsync(studentCode, entryKey, resolvedExamId, solution, cancellationToken);
 
                     var exam = await _examService.GetByIdAsync(resolvedExamId);
-                    var examCode = exam?.Examname ?? "PE_PRN232_SU25_332278"; // fallback if exam not found
+                    var examCode = exam?.Examname ?? "PE_PRN232_FA25_20251019"; // fallback if exam not found
 
                     // Get ExaminerCode from current user email
                     var examinerCode = GetCurrentUserEmail();
@@ -238,9 +239,11 @@ namespace Service
         private async Task<Submission> FindOrCreateSubmissionAsync(string studentCode, string fileUrl, int examId, string solution, CancellationToken cancellationToken)
         {
             // Find student by Studentroll (student code) - case insensitive
-            var studentCodeLower = studentCode?.ToLowerInvariant() ?? string.Empty;
-            var student = _unitOfWork.GetAllWithDetails()
-                .FirstOrDefault(s => s.Studentroll != null && s.Studentroll.ToLower() == studentCodeLower);
+
+            //var studentCodeLower = studentCode?.ToLowerInvariant() ?? string.Empty;
+            //var student = await _unitOfWork.GetAllWithDetails()
+            //    .FirstOrDefaultAsync(s => s.Studentroll.Trim().ToLower().Equals(studentCodeLower.Trim()));
+            var student = await _unitOfWork.GetStudentWithDetails(studentCode);
 
             if (student == null)
             {
