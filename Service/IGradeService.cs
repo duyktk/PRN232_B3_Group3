@@ -10,7 +10,7 @@ namespace Service
 {
     public interface IGradeService
     {
-        Task<GradeResultDto> CreateGradeAsync(int myUserId, string myRole, GradeUpsertDto dto);
-        Task<GradeResultDto> UpdateGradeAsync(int myUserId, string myRole, GradeUpsertDto dto);
+        Task<GradeResultDto> CreateGradeAsync(int myUserId, string myRole, int submissionId, GradeUpsertDto dto);
+        Task<GradeResultDto> UpdateGradeAsync(int myUserId, string myRole, int submissionId, GradeUpsertDto dto);
     }
 }
