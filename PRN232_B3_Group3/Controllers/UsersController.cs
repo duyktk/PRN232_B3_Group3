@@ -3,11 +3,13 @@ using Repository.Models;
 using Service.DTOs;
 using Service.Interfaces;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PRN232_B3_Group3.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Roles = "0")]
     public class UsersController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -17,15 +19,12 @@ namespace PRN232_B3_Group3.Controllers
             _userService = userService;
         }
 
-        // Helper lấy Role từ Token hiện tại
+        // Helper to get Role from current Token
         private string GetCurrentRole()
         {
-            // Nếu chưa làm authen, tạm thời return "0" để test quyền Admin
-             return "0"; 
-
-            // Logic thật: Lấy Claim Role từ Token
-            //var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
-            //return role ?? "-1"; // Trả về -1 nếu không tìm thấy role
+            // Real logic: Get Claim Role from Token
+            var role = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            return role ?? "-1"; // Return -1 if role not found
         }
 
         [HttpGet]
@@ -50,7 +49,7 @@ namespace PRN232_B3_Group3.Controllers
             {
                 var role = GetCurrentRole();
                 await _userService.CreateUserAsync(userDto, role);
-                return Ok(new { message = "Tạo user thành công" });
+                return Ok(new { message = "User created successfully" });
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -65,19 +64,19 @@ namespace PRN232_B3_Group3.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] UserDto userDto)
         {
-            if (id != userDto.Userid) return BadRequest("ID không khớp");
+            if (id != userDto.Userid) return BadRequest("ID does not match");
 
             try
             {
                 var role = GetCurrentRole();
                 await _userService.UpdateUserAsync(userDto, role);
-                return Ok(new { message = "Cập nhật thành công" });
+                return Ok(new { message = "Update successful" });
             }
             catch (UnauthorizedAccessException ex)
             {
                 return StatusCode(403, new { message = ex.Message });
             }
-            catch (Exception ex) // Bắt các lỗi logic khác (như không tìm thấy user)
+            catch (Exception ex) // Catch other logic errors (such as user not found)
             {
                 return BadRequest(new { message = ex.Message });
             }
@@ -90,7 +89,7 @@ namespace PRN232_B3_Group3.Controllers
             {
                 var role = GetCurrentRole();
                 await _userService.DeleteUserAsync(id, role);
-                return Ok(new { message = "Xóa (ẩn) user thành công" });
+                return Ok(new { message = "User deleted (hidden) successfully" });
             }
             catch (UnauthorizedAccessException ex)
             {

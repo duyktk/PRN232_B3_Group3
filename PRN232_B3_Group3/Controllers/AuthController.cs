@@ -24,7 +24,7 @@ namespace PRN232_B3_Group3.Controllers
 
                 if (result == null)
                 {
-                    return Unauthorized("Sai tài khoản hoặc mật khẩu.");
+                    return Unauthorized("Invalid username or password.");
                 }
 
                 return Ok(result);
